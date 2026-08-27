@@ -451,17 +451,19 @@ def kill_process_tree(proc):
             pass
 
 
-def set_window_icon():
-    """在 Windows 下为原生窗口设置 logo 图标"""
+def configure_window():
+    """在 Windows 下为原生窗口设置 logo 图标并精准屏幕居中"""
     if platform.system() != "Windows":
         return
 
     import ctypes
-    time.sleep(0.3)  # 等待窗口句柄创建完成
+    from ctypes import wintypes
+    time.sleep(0.15)  # 等待窗口句柄创建完成
     try:
         user32 = ctypes.windll.user32
         hwnd = user32.FindWindowW(None, "AirServe")
         if hwnd:
+            # 1. 设置原生 Logo 图标
             ico_path = os.path.abspath(os.path.join(BASE_PATH, "gui", "logo.ico"))
             if not os.path.exists(ico_path):
                 ico_path = os.path.abspath(os.path.join(BASE_PATH, "logo.ico"))
@@ -480,8 +482,21 @@ def set_window_icon():
                     user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, h_icon_big)
                 if h_icon_small:
                     user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, h_icon_small)
+
+            # 2. 强化屏幕居中
+            rect = wintypes.RECT()
+            if user32.GetWindowRect(hwnd, ctypes.byref(rect)):
+                win_width = rect.right - rect.left
+                win_height = rect.bottom - rect.top
+                screen_width = user32.GetSystemMetrics(0)   # SM_CXSCREEN
+                screen_height = user32.GetSystemMetrics(1)  # SM_CYSCREEN
+                pos_x = max(0, (screen_width - win_width) // 2)
+                pos_y = max(0, (screen_height - win_height) // 2)
+                # SWP_NOSIZE(1) | SWP_NOZORDER(4) | SWP_SHOWWINDOW(0x0040)
+                user32.SetWindowPos(hwnd, 0, pos_x, pos_y, 0, 0, 0x0001 | 0x0004 | 0x0040)
+
     except Exception as e:
-        print("Set window icon error:", e)
+        print("Configure window error:", e)
 
 
 def main():
@@ -493,12 +508,29 @@ def main():
     # 注册程序退出钩子，确保任意异常退出均能销毁 miniserve 进程
     atexit.register(api.stop_server)
 
+    # 预计算屏幕居中坐标
+    win_w = 590
+    win_h = 488
+    init_x = None
+    init_y = None
+    if platform.system() == "Windows":
+        try:
+            import ctypes
+            sw = ctypes.windll.user32.GetSystemMetrics(0)
+            sh = ctypes.windll.user32.GetSystemMetrics(1)
+            init_x = max(0, (sw - win_w) // 2)
+            init_y = max(0, (sh - win_h) // 2)
+        except Exception:
+            pass
+
     window = webview.create_window(
         title="AirServe",
         url=html_path,
         js_api=api,
-        width=590,
-        height=488,
+        width=win_w,
+        height=win_h,
+        x=init_x,
+        y=init_y,
         resizable=False,
         text_select=False
     )
@@ -508,8 +540,8 @@ def main():
         api.stop_server()
 
     def on_shown():
-        # 后台线程设置窗口原生图标
-        threading.Thread(target=set_window_icon, daemon=True).start()
+        # 后台线程设置窗口原生图标与二次居中校验
+        threading.Thread(target=configure_window, daemon=True).start()
 
     window.events.closing += on_closing
     window.events.closed += on_closing
