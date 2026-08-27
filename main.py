@@ -499,6 +499,51 @@ def configure_window():
         print("Configure window error:", e)
 
 
+_SINGLE_INSTANCE_MUTEX = None
+_SINGLE_INSTANCE_SOCKET = None
+
+
+def ensure_single_instance() -> bool:
+    """
+    单实例运行保护。
+    若已有 AirServe 实例正在运行，自动唤醒并置顶已有窗口，并返回 False 退出当前多开进程。
+    """
+    global _SINGLE_INSTANCE_MUTEX, _SINGLE_INSTANCE_SOCKET
+
+    if platform.system() == "Windows":
+        try:
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
+            user32 = ctypes.windll.user32
+
+            ERROR_ALREADY_EXISTS = 183
+            mutex_name = "Global\\AirServe_SingleInstance_Mutex_Lock"
+            mutex = kernel32.CreateMutexW(None, False, mutex_name)
+            last_error = kernel32.GetLastError()
+
+            if last_error == ERROR_ALREADY_EXISTS:
+                # 已经有实例在运行，查找并置顶已有窗口
+                hwnd = user32.FindWindowW(None, "AirServe")
+                if hwnd:
+                    # 9 = SW_RESTORE (恢复最小化/后台窗口并激活)
+                    user32.ShowWindow(hwnd, 9)
+                    user32.SetForegroundWindow(hwnd)
+                return False
+
+            _SINGLE_INSTANCE_MUTEX = mutex
+            return True
+        except Exception:
+            return True
+    else:
+        # macOS / Linux 平台通过本地端口锁进行单例互斥
+        try:
+            _SINGLE_INSTANCE_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            _SINGLE_INSTANCE_SOCKET.bind(("127.0.0.1", 49199))
+            return True
+        except Exception:
+            return False
+
+
 def main():
     import atexit
     window_holder = {}
@@ -549,6 +594,9 @@ def main():
 
 
 if __name__ == "__main__":
+    if not ensure_single_instance():
+        sys.exit(0)
+
     try:
         main()
     except Exception as e:

@@ -1,1108 +1,1172 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AirServe</title>
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="shortcut icon" href="logo.ico">
-  <style>
-    :root {
-      --primary: #007AFF;
-      --primary-hover: #0062CC;
-      --success: #34C759;
-      --success-hover: #28A745;
-      --danger: #FF3B30;
-      --danger-hover: #D70015;
-      --bg-gradient: linear-gradient(135deg, #F5F7FA 0%, #E4E8EE 100%);
-      --card-bg: rgba(255, 255, 255, 0.82);
-      --card-border: rgba(0, 0, 0, 0.08);
-      --input-bg: rgba(0, 0, 0, 0.04);
-      --input-border: rgba(0, 0, 0, 0.1);
-      --text-main: #1D1D1F;
-      --text-muted: #86868B;
-      --text-secondary: #515154;
-      --dropdown-bg: rgba(255, 255, 255, 0.98);
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-    }
-
-    @media (prefers-color-scheme: dark) {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AirServe</title>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="shortcut icon" href="logo.ico" />
+    <style>
       :root {
-        --bg-gradient: linear-gradient(135deg, #141416 0%, #1E1E22 100%);
-        --card-bg: rgba(36, 36, 40, 0.78);
-        --card-border: rgba(255, 255, 255, 0.08);
-        --input-bg: rgba(255, 255, 255, 0.06);
-        --input-border: rgba(255, 255, 255, 0.12);
-        --text-main: #F5F5F7;
-        --text-muted: #98989D;
-        --text-secondary: #C7C7CC;
-        --dropdown-bg: rgba(44, 44, 48, 0.98);
-        --shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+        --primary: #007aff;
+        --primary-hover: #0062cc;
+        --success: #34c759;
+        --success-hover: #28a745;
+        --danger: #ff3b30;
+        --danger-hover: #d70015;
+        --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e4e8ee 100%);
+        --card-bg: rgba(255, 255, 255, 0.82);
+        --card-border: rgba(0, 0, 0, 0.08);
+        --input-bg: rgba(0, 0, 0, 0.04);
+        --input-border: rgba(0, 0, 0, 0.1);
+        --text-main: #1d1d1f;
+        --text-muted: #86868b;
+        --text-secondary: #515154;
+        --dropdown-bg: rgba(255, 255, 255, 0.98);
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
       }
-    }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-drag: none;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Segoe UI Variable Display", "Segoe UI", sans-serif;
-    }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-gradient: linear-gradient(135deg, #141416 0%, #1e1e22 100%);
+          --card-bg: rgba(36, 36, 40, 0.78);
+          --card-border: rgba(255, 255, 255, 0.08);
+          --input-bg: rgba(255, 255, 255, 0.06);
+          --input-border: rgba(255, 255, 255, 0.12);
+          --text-main: #f5f5f7;
+          --text-muted: #98989d;
+          --text-secondary: #c7c7cc;
+          --dropdown-bg: rgba(44, 44, 48, 0.98);
+          --shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+        }
+      }
 
-    body {
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 18px 20px 12px 20px;
-      overflow: hidden;
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        user-select: none;
+        -webkit-user-drag: none;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+          "PingFang SC", "Segoe UI Variable Display", "Segoe UI", sans-serif;
+      }
 
-    /* Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
+      body {
+        background: var(--bg-gradient);
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 18px 20px 12px 20px;
+        overflow: hidden;
+      }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+      /* Header */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
 
-    .app-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 11px;
-      object-fit: cover;
-      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
-    }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
 
-    .brand-title {
-      font-size: 19px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+      .app-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        object-fit: cover;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+      }
 
-    .badge-pro {
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--primary);
-      background: rgba(0, 122, 255, 0.12);
-      padding: 2px 7px;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
-    }
+      .brand-title {
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
 
-    .brand-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 1px;
-    }
+      .badge-pro {
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--primary);
+        background: rgba(0, 122, 255, 0.12);
+        padding: 2px 7px;
+        border-radius: 6px;
+        letter-spacing: 0.5px;
+      }
 
-    /* Cards */
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 14px 16px;
-      margin-bottom: 12px;
-      box-shadow: var(--shadow);
-    }
+      .brand-subtitle {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
 
-    .card-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+      /* Cards */
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        box-shadow: var(--shadow);
+      }
 
-    /* Row Layout */
-    .form-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
+      .card-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-    .form-row:last-child {
-      margin-bottom: 0;
-    }
+      /* Row Layout */
+      .form-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
 
-    .field-label {
-      width: 68px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      font-weight: 500;
-      flex-shrink: 0;
-    }
+      .form-row:last-child {
+        margin-bottom: 0;
+      }
 
-    /* Directory Input & Custom Dropdown */
-    .dir-wrapper {
-      position: relative;
-      flex: 1;
-    }
+      .field-label {
+        width: 68px;
+        font-size: 13px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        flex-shrink: 0;
+      }
 
-    .custom-input-box {
-      display: flex;
-      align-items: center;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 10px;
-      height: 38px;
-      padding: 0 10px;
-      transition: all 0.2s ease;
-    }
+      /* Directory Input & Custom Dropdown */
+      .dir-wrapper {
+        position: relative;
+        flex: 1;
+      }
 
-    .custom-input-box:focus-within {
-      border-color: var(--primary);
-      background: transparent;
-      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
-    }
+      .custom-input-box {
+        display: flex;
+        align-items: center;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        height: 38px;
+        padding: 0 10px;
+        transition: all 0.2s ease;
+      }
 
-    .input-icon {
-      font-size: 15px;
-      margin-right: 8px;
-      opacity: 0.8;
-    }
+      .custom-input-box:focus-within {
+        border-color: var(--primary);
+        background: transparent;
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
+      }
 
-    .text-input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      outline: none;
-      color: var(--text-main);
-      font-size: 13px;
-      width: 100%;
-      user-select: text;
-    }
+      .input-icon {
+        font-size: 15px;
+        margin-right: 8px;
+        opacity: 0.8;
+      }
 
-    .dropdown-arrow {
-      cursor: pointer;
-      padding: 4px;
-      font-size: 11px;
-      color: var(--text-muted);
-      transition: transform 0.2s;
-    }
+      .text-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        outline: none;
+        color: var(--text-main);
+        font-size: 13px;
+        width: 100%;
+        user-select: text;
+      }
 
-    .dropdown-arrow.open {
-      transform: rotate(180deg);
-    }
+      .dropdown-arrow {
+        cursor: pointer;
+        padding: 4px;
+        font-size: 11px;
+        color: var(--text-muted);
+        transition: transform 0.2s;
+      }
 
-    /* Dropdown Menu */
-    .dropdown-menu {
-      position: absolute;
-      top: 44px;
-      left: 0;
-      right: 0;
-      background: var(--dropdown-bg);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
-      max-height: 180px;
-      overflow-y: auto;
-      z-index: 100;
-      display: none;
-      padding: 6px;
-    }
+      .dropdown-arrow.open {
+        transform: rotate(180deg);
+      }
 
-    .dropdown-menu.show {
-      display: block;
-      animation: popIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+      /* Dropdown Menu */
+      .dropdown-menu {
+        position: absolute;
+        top: 44px;
+        left: 0;
+        right: 0;
+        background: var(--dropdown-bg);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+        max-height: 180px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+        padding: 6px;
+      }
 
-    @keyframes popIn {
-      from { opacity: 0; transform: translateY(-6px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
+      .dropdown-menu.show {
+        display: block;
+        animation: popIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      }
 
-    .dropdown-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: background 0.15s;
-      gap: 6px;
-    }
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: translateY(-6px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
 
-    .dropdown-item:hover {
-      background: var(--input-bg);
-    }
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: background 0.15s;
+        gap: 6px;
+      }
 
-    .dropdown-item-path {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      flex: 1;
-      margin-left: 4px;
-    }
+      .dropdown-item:hover {
+        background: var(--input-bg);
+      }
 
-    .delete-item-btn {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-size: 14px;
-      line-height: 1;
-      opacity: 0.6;
-      transition: all 0.15s;
-    }
+      .dropdown-item-path {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+        margin-left: 4px;
+      }
 
-    .delete-item-btn:hover {
-      opacity: 1;
-      background: rgba(255, 59, 48, 0.15);
-      color: var(--danger);
-    }
+      .delete-item-btn {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1;
+        opacity: 0.6;
+        transition: all 0.15s;
+      }
 
-    .dropdown-footer {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 4px 2px 4px;
-      margin-top: 4px;
-      border-top: 1px solid var(--card-border);
-    }
+      .delete-item-btn:hover {
+        opacity: 1;
+        background: rgba(255, 59, 48, 0.15);
+        color: var(--danger);
+      }
 
-    .clear-history-btn {
-      font-size: 11px;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 3px 8px;
-      border-radius: 6px;
-      transition: all 0.15s;
-    }
+      .dropdown-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 4px 2px 4px;
+        margin-top: 4px;
+        border-top: 1px solid var(--card-border);
+      }
 
-    .clear-history-btn:hover {
-      color: var(--danger);
-      background: rgba(255, 59, 48, 0.1);
-    }
+      .clear-history-btn {
+        font-size: 11px;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 3px 8px;
+        border-radius: 6px;
+        transition: all 0.15s;
+      }
 
-    /* Buttons */
-    .btn {
-      height: 38px;
-      padding: 0 16px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-      outline: none;
-    }
+      .clear-history-btn:hover {
+        color: var(--danger);
+        background: rgba(255, 59, 48, 0.1);
+      }
 
-    .btn:active {
-      transform: scale(0.97);
-    }
+      /* Buttons */
+      .btn {
+        height: 38px;
+        padding: 0 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        outline: none;
+      }
 
-    .btn-secondary {
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      color: var(--text-main);
-    }
+      .btn:active {
+        transform: scale(0.97);
+      }
 
-    .btn-secondary:hover {
-      background: rgba(0, 0, 0, 0.08);
-    }
+      .btn-secondary {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-main);
+      }
 
-    @media (prefers-color-scheme: dark) {
       .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.08);
       }
-    }
 
-    /* Action Container & Buttons */
-    .action-container {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      width: 100%;
-    }
-
-    .hero-btn {
-      flex: 1;
-      height: 44px;
-      border-radius: 12px;
-      font-size: 14.5px;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: #FFFFFF;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      outline: none;
-      position: relative;
-    }
-
-    .hero-btn.start {
-      background: linear-gradient(135deg, #34C759 0%, #22883B 100%);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 6px 18px rgba(52, 199, 89, 0.32);
-    }
-
-    .hero-btn.start:hover {
-      filter: brightness(1.06);
-      transform: translateY(-1.5px);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(52, 199, 89, 0.42);
-    }
-
-    .hero-btn.stop {
-      background: linear-gradient(135deg, #FF453A 0%, #D70015 100%);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 6px 18px rgba(255, 59, 48, 0.32);
-    }
-
-    .hero-btn.stop:hover {
-      filter: brightness(1.06);
-      transform: translateY(-1.5px);
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 8px 24px rgba(255, 59, 48, 0.42);
-    }
-
-    .hero-btn:active {
-      transform: scale(0.98) translateY(0);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
-    }
-
-    .hero-btn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    .hero-icon {
-      font-size: 14px;
-    }
-
-    /* Sub Action Button (Restart) */
-    .restart-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      border: 1px solid var(--card-border);
-      background: var(--input-bg);
-      color: var(--text-main);
-      font-size: 16px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      outline: none;
-      animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .restart-btn:hover {
-      background: rgba(0, 122, 255, 0.12);
-      color: var(--primary);
-      border-color: rgba(0, 122, 255, 0.3);
-      transform: translateY(-1.5px);
-      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
-    }
-
-    .restart-btn:active {
-      transform: scale(0.94) translateY(0);
-    }
-
-    .spin-icon {
-      display: inline-block;
-      transition: transform 0.4s ease;
-    }
-
-    .restart-btn:hover .spin-icon {
-      transform: rotate(180deg);
-    }
-
-    /* Export Standalone Button */
-    .btn-export {
-      height: 44px;
-      padding: 0 16px;
-      border-radius: 12px;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      color: var(--text-main);
-      font-size: 13px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      outline: none;
-      flex-shrink: 0;
-    }
-
-    .btn-export:hover:not(:disabled) {
-      background: rgba(99, 102, 241, 0.12);
-      color: #6366F1;
-      border-color: rgba(99, 102, 241, 0.35);
-      transform: translateY(-1.5px);
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
-    }
-
-    .btn-export:active:not(:disabled) {
-      transform: scale(0.96) translateY(0);
-    }
-
-    .btn-export:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    /* Port Input Box */
-    .port-input-box {
-      width: 90px;
-      padding: 0 10px !important;
-    }
-
-    /* iOS Switch */
-    .switch-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      margin-left: 8px;
-    }
-
-    .switch {
-      position: relative;
-      width: 38px;
-      height: 22px;
-      background: rgba(120, 120, 128, 0.25);
-      border-radius: 20px;
-      transition: background 0.25s;
-    }
-
-    .switch-knob {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 18px;
-      height: 18px;
-      background: #FFFFFF;
-      border-radius: 50%;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .switch.on {
-      background: var(--primary);
-    }
-
-    .switch.on .switch-knob {
-      transform: translateX(16px);
-    }
-
-    .switch-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    /* Divider */
-    .divider {
-      height: 1px;
-      background: var(--card-border);
-      margin: 10px 0;
-    }
-
-    /* Status Header & Pill */
-    .status-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: var(--input-bg);
-      font-size: 12px;
-      font-weight: 600;
-      border: 1px solid var(--card-border);
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #8E8E93;
-      transition: all 0.3s;
-    }
-
-    .status-dot.active {
-      background: var(--success);
-      box-shadow: 0 0 8px var(--success);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.6); }
-      70% { box-shadow: 0 0 0 6px rgba(52, 199, 89, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(52, 199, 89, 0); }
-    }
-
-    /* Safari Capsule Bar */
-    .safari-bar {
-      display: flex;
-      align-items: center;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 12px;
-      padding: 6px 10px;
-      margin-bottom: 12px;
-      gap: 8px;
-    }
-
-    .safari-icon {
-      font-size: 14px;
-      opacity: 0.8;
-    }
-
-    .url-display {
-      flex: 1;
-      font-size: 12.5px;
-      color: var(--text-muted);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      user-select: text;
-      font-family: -apple-system, monospace;
-    }
-
-    .url-display.active {
-      color: var(--primary);
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .pill-btn {
-      height: 28px;
-      padding: 0 10px;
-      border-radius: 7px;
-      font-size: 11.5px;
-      font-weight: 600;
-      border: none;
-      background: var(--card-bg);
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      border: 1px solid var(--card-border);
-    }
-
-    .pill-btn:hover:not(:disabled) {
-      background: var(--primary);
-      color: #FFF;
-      border-color: transparent;
-    }
-
-    .pill-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    /* Toast Alert */
-    .toast {
-      position: fixed;
-      top: 18px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-60px);
-      background: rgba(30, 30, 32, 0.92);
-      color: #FFF;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      z-index: 999;
-      opacity: 0;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Toast Notice -->
-  <div id="toast" class="toast">
-    <span id="toast-icon">✓</span>
-    <span id="toast-text">提示信息</span>
-  </div>
-
-  <!-- Header -->
-  <div class="header">
-    <div class="brand">
-      <img src="logo.png" class="app-icon" alt="AirServe Logo" />
-      <div>
-        <div class="brand-title">
-          AirServe
-          <span class="badge-pro">PRO</span>
-        </div>
-        <div class="brand-subtitle">极简、优雅的本地原型交付与静态服务</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Configuration Card -->
-  <div class="card">
-    <div class="card-title">⚙️ 服务配置</div>
-    
-    <!-- Directory Row -->
-    <div class="form-row">
-      <div class="field-label">静态目录</div>
-      <div class="dir-wrapper">
-        <div class="custom-input-box">
-          <span class="input-icon">📁</span>
-          <input type="text" id="dir-input" class="text-input" placeholder="选择包含 index.html 的目录..." />
-          <span id="dropdown-toggle" class="dropdown-arrow">▼</span>
-        </div>
-        <!-- History Dropdown -->
-        <div id="dropdown-menu" class="dropdown-menu"></div>
-      </div>
-      <button id="browse-btn" class="btn btn-secondary">浏览...</button>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Port & Switch Row -->
-    <div class="form-row">
-      <div class="field-label">服务端口</div>
-      <div class="custom-input-box port-input-box">
-        <input type="text" id="port-input" class="text-input" value="8080" maxlength="5" style="text-align:center; font-weight:600; font-size:13.5px; letter-spacing:0.5px;" />
-      </div>
-
-      <div id="auto-port-toggle" class="switch-wrapper">
-        <div id="switch-body" class="switch on">
-          <div class="switch-knob"></div>
-        </div>
-        <span class="switch-label">端口被占用时自动递增</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Status & Controls Card -->
-  <div class="card">
-    <div class="status-header">
-      <div class="card-title" style="margin-bottom:0">🌐 运行状态</div>
-      <div class="status-pill">
-        <div id="status-dot" class="status-dot"></div>
-        <span id="status-text">未运行</span>
-      </div>
-    </div>
-
-    <!-- Safari Capsule -->
-    <div class="safari-bar">
-      <span id="safari-icon" class="safari-icon">🌐</span>
-      <div id="url-display" class="url-display">服务尚未启动</div>
-      <button id="copy-btn" class="pill-btn" disabled>📋 复制</button>
-      <button id="open-btn" class="pill-btn" disabled>打开 ↗</button>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-container">
-      <button id="hero-btn" class="hero-btn start">
-        <span id="hero-icon" class="hero-icon">▶</span>
-        <span id="hero-text">启动服务</span>
-      </button>
-      <button id="restart-btn" class="restart-btn" title="重启服务" style="display: none;">
-        <span class="spin-icon">🔄</span>
-      </button>
-      <button id="export-btn" class="btn-export" title="将当前原型打包为独立单文件 EXE，直接发给客户双击运行">
-        <span id="export-icon">📦</span>
-        <span id="export-text">导出独立 EXE</span>
-      </button>
-    </div>
-  </div>
-
-  <script>
-    let isRunning = false;
-    let autoPortEnabled = true;
-    let recentDirs = [];
-    let currentPort = 8080;
-
-    const dirInput = document.getElementById('dir-input');
-    const portInput = document.getElementById('port-input');
-    const dropdownToggle = document.getElementById('dropdown-toggle');
-    const dropdownMenu = document.getElementById('dropdown-menu');
-    const browseBtn = document.getElementById('browse-btn');
-    const switchBody = document.getElementById('switch-body');
-    const autoPortToggle = document.getElementById('auto-port-toggle');
-    
-    // Action Elements
-    const heroBtn = document.getElementById('hero-btn');
-    const heroIcon = document.getElementById('hero-icon');
-    const heroText = document.getElementById('hero-text');
-    const restartBtn = document.getElementById('restart-btn');
-    const exportBtn = document.getElementById('export-btn');
-    const exportIcon = document.getElementById('export-icon');
-    const exportText = document.getElementById('export-text');
-
-    const statusDot = document.getElementById('status-dot');
-    const statusText = document.getElementById('status-text');
-    const safariIcon = document.getElementById('safari-icon');
-    const urlDisplay = document.getElementById('url-display');
-    const copyBtn = document.getElementById('copy-btn');
-    const openBtn = document.getElementById('open-btn');
-
-    // Toast Notice
-    function showToast(msg, icon = '✓') {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-text').innerText = msg;
-      document.getElementById('toast-icon').innerText = icon;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2800);
-    }
-
-    // Toggle Auto Port Switch
-    autoPortToggle.addEventListener('click', () => {
-      autoPortEnabled = !autoPortEnabled;
-      switchBody.classList.toggle('on', autoPortEnabled);
-    });
-
-    // Render History Dropdown
-    function renderDropdown() {
-      dropdownMenu.innerHTML = '';
-      if (!recentDirs || recentDirs.length === 0) {
-        dropdownMenu.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:12px; text-align:center;">暂无历史记录</div>';
-        return;
+      @media (prefers-color-scheme: dark) {
+        .btn-secondary:hover {
+          background: rgba(255, 255, 255, 0.12);
+        }
       }
-      recentDirs.forEach(path => {
-        const item = document.createElement('div');
-        item.className = 'dropdown-item';
-        item.innerHTML = `
+
+      /* Action Container & Buttons */
+      .action-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+      }
+
+      .hero-btn {
+        flex: 1;
+        height: 44px;
+        border-radius: 12px;
+        font-size: 14.5px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #ffffff;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        outline: none;
+        position: relative;
+      }
+
+      .hero-btn.start {
+        background: linear-gradient(135deg, #34c759 0%, #22883b 100%);
+        box-shadow:
+          inset 0 1px 1px rgba(255, 255, 255, 0.4),
+          0 6px 18px rgba(52, 199, 89, 0.32);
+      }
+
+      .hero-btn.start:hover {
+        filter: brightness(1.06);
+        transform: translateY(-1.5px);
+        box-shadow:
+          inset 0 1px 1px rgba(255, 255, 255, 0.4),
+          0 8px 24px rgba(52, 199, 89, 0.42);
+      }
+
+      .hero-btn.stop {
+        background: linear-gradient(135deg, #ff453a 0%, #d70015 100%);
+        box-shadow:
+          inset 0 1px 1px rgba(255, 255, 255, 0.4),
+          0 6px 18px rgba(255, 59, 48, 0.32);
+      }
+
+      .hero-btn.stop:hover {
+        filter: brightness(1.06);
+        transform: translateY(-1.5px);
+        box-shadow:
+          inset 0 1px 1px rgba(255, 255, 255, 0.4),
+          0 8px 24px rgba(255, 59, 48, 0.42);
+      }
+
+      .hero-btn:active {
+        transform: scale(0.98) translateY(0);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+      }
+
+      .hero-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      .hero-icon {
+        font-size: 14px;
+      }
+
+      /* Sub Action Button (Restart) */
+      .restart-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        background: var(--input-bg);
+        color: var(--text-main);
+        font-size: 16px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        outline: none;
+        animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .restart-btn:hover {
+        background: rgba(0, 122, 255, 0.12);
+        color: var(--primary);
+        border-color: rgba(0, 122, 255, 0.3);
+        transform: translateY(-1.5px);
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+      }
+
+      .restart-btn:active {
+        transform: scale(0.94) translateY(0);
+      }
+
+      .spin-icon {
+        display: inline-block;
+        transition: transform 0.4s ease;
+      }
+
+      .restart-btn:hover .spin-icon {
+        transform: rotate(180deg);
+      }
+
+      /* Export Standalone Button */
+      .btn-export {
+        height: 44px;
+        padding: 0 16px;
+        border-radius: 12px;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-main);
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        outline: none;
+        flex-shrink: 0;
+      }
+
+      .btn-export:hover:not(:disabled) {
+        background: rgba(99, 102, 241, 0.12);
+        color: #6366f1;
+        border-color: rgba(99, 102, 241, 0.35);
+        transform: translateY(-1.5px);
+        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.25);
+      }
+
+      .btn-export:active:not(:disabled) {
+        transform: scale(0.96) translateY(0);
+      }
+
+      .btn-export:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      /* Port Input Box */
+      .port-input-box {
+        width: 90px;
+        padding: 0 10px !important;
+      }
+
+      /* iOS Switch */
+      .switch-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        margin-left: 8px;
+      }
+
+      .switch {
+        position: relative;
+        width: 38px;
+        height: 22px;
+        background: rgba(120, 120, 128, 0.25);
+        border-radius: 20px;
+        transition: background 0.25s;
+      }
+
+      .switch-knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .switch.on {
+        background: var(--primary);
+      }
+
+      .switch.on .switch-knob {
+        transform: translateX(16px);
+      }
+
+      .switch-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      /* Divider */
+      .divider {
+        height: 1px;
+        background: var(--card-border);
+        margin: 10px 0;
+      }
+
+      /* Status Header & Pill */
+      .status-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: var(--input-bg);
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid var(--card-border);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #8e8e93;
+        transition: all 0.3s;
+      }
+
+      .status-dot.active {
+        background: var(--success);
+        box-shadow: 0 0 8px var(--success);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.6);
+        }
+        70% {
+          box-shadow: 0 0 0 6px rgba(52, 199, 89, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(52, 199, 89, 0);
+        }
+      }
+
+      /* Safari Capsule Bar */
+      .safari-bar {
+        display: flex;
+        align-items: center;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 12px;
+        padding: 6px 10px;
+        margin-bottom: 12px;
+        gap: 8px;
+      }
+
+      .safari-icon {
+        font-size: 14px;
+        opacity: 0.8;
+      }
+
+      .url-display {
+        flex: 1;
+        font-size: 12.5px;
+        color: var(--text-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        user-select: text;
+        font-family: -apple-system, monospace;
+      }
+
+      .url-display.active {
+        color: var(--primary);
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .pill-btn {
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 7px;
+        font-size: 11.5px;
+        font-weight: 600;
+        border: none;
+        background: var(--card-bg);
+        color: var(--text-main);
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid var(--card-border);
+      }
+
+      .pill-btn:hover:not(:disabled) {
+        background: var(--primary);
+        color: #fff;
+        border-color: transparent;
+      }
+
+      .pill-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* Toast Alert */
+      .toast {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-60px);
+        background: rgba(30, 30, 32, 0.92);
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        z-index: 999;
+        opacity: 0;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Toast Notice -->
+    <div id="toast" class="toast">
+      <span id="toast-icon">✓</span>
+      <span id="toast-text">提示信息</span>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <img src="logo.png" class="app-icon" alt="AirServe Logo" />
+        <div>
+          <div class="brand-title">
+            AirServe
+            <span class="badge-pro">PRO</span>
+          </div>
+          <div class="brand-subtitle">极简、优雅的本地原型交付与静态服务</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration Card -->
+    <div class="card">
+      <div class="card-title">⚙️ 服务配置</div>
+
+      <!-- Directory Row -->
+      <div class="form-row">
+        <div class="field-label">静态目录</div>
+        <div class="dir-wrapper">
+          <div class="custom-input-box">
+            <span class="input-icon">📁</span>
+            <input
+              type="text"
+              id="dir-input"
+              class="text-input"
+              placeholder="选择包含 index.html 的目录..."
+            />
+            <span id="dropdown-toggle" class="dropdown-arrow">▼</span>
+          </div>
+          <!-- History Dropdown -->
+          <div id="dropdown-menu" class="dropdown-menu"></div>
+        </div>
+        <button id="browse-btn" class="btn btn-secondary">浏览...</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Port & Switch Row -->
+      <div class="form-row">
+        <div class="field-label">服务端口</div>
+        <div class="custom-input-box port-input-box">
+          <input
+            type="text"
+            id="port-input"
+            class="text-input"
+            value="8080"
+            maxlength="5"
+            style="
+              text-align: center;
+              font-weight: 600;
+              font-size: 13.5px;
+              letter-spacing: 0.5px;
+            "
+          />
+        </div>
+
+        <div id="auto-port-toggle" class="switch-wrapper">
+          <div id="switch-body" class="switch on">
+            <div class="switch-knob"></div>
+          </div>
+          <span class="switch-label">端口被占用时自动递增</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status & Controls Card -->
+    <div class="card">
+      <div class="status-header">
+        <div class="card-title" style="margin-bottom: 0">🌐 运行状态</div>
+        <div class="status-pill">
+          <div id="status-dot" class="status-dot"></div>
+          <span id="status-text">未运行</span>
+        </div>
+      </div>
+
+      <!-- Safari Capsule -->
+      <div class="safari-bar">
+        <span id="safari-icon" class="safari-icon">🌐</span>
+        <div id="url-display" class="url-display">服务尚未启动</div>
+        <button id="copy-btn" class="pill-btn" disabled>📋 复制</button>
+        <button id="open-btn" class="pill-btn" disabled>打开 ↗</button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-container">
+        <button id="hero-btn" class="hero-btn start">
+          <span id="hero-icon" class="hero-icon">▶</span>
+          <span id="hero-text">启动服务</span>
+        </button>
+        <button
+          id="restart-btn"
+          class="restart-btn"
+          title="重启服务"
+          style="display: none"
+        >
+          <span class="spin-icon">🔄</span>
+        </button>
+        <button
+          id="export-btn"
+          class="btn-export"
+          title="将当前原型打包为独立单文件 EXE，直接发给客户双击运行"
+        >
+          <span id="export-icon">📦</span>
+          <span id="export-text">导出独立 EXE</span>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      let isRunning = false;
+      let autoPortEnabled = true;
+      let recentDirs = [];
+      let currentPort = 8080;
+
+      const dirInput = document.getElementById("dir-input");
+      const portInput = document.getElementById("port-input");
+      const dropdownToggle = document.getElementById("dropdown-toggle");
+      const dropdownMenu = document.getElementById("dropdown-menu");
+      const browseBtn = document.getElementById("browse-btn");
+      const switchBody = document.getElementById("switch-body");
+      const autoPortToggle = document.getElementById("auto-port-toggle");
+
+      // Action Elements
+      const heroBtn = document.getElementById("hero-btn");
+      const heroIcon = document.getElementById("hero-icon");
+      const heroText = document.getElementById("hero-text");
+      const restartBtn = document.getElementById("restart-btn");
+      const exportBtn = document.getElementById("export-btn");
+      const exportIcon = document.getElementById("export-icon");
+      const exportText = document.getElementById("export-text");
+
+      const statusDot = document.getElementById("status-dot");
+      const statusText = document.getElementById("status-text");
+      const safariIcon = document.getElementById("safari-icon");
+      const urlDisplay = document.getElementById("url-display");
+      const copyBtn = document.getElementById("copy-btn");
+      const openBtn = document.getElementById("open-btn");
+
+      // Toast Notice
+      function showToast(msg, icon = "✓") {
+        const toast = document.getElementById("toast");
+        document.getElementById("toast-text").innerText = msg;
+        document.getElementById("toast-icon").innerText = icon;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2800);
+      }
+
+      // Toggle Auto Port Switch
+      autoPortToggle.addEventListener("click", () => {
+        autoPortEnabled = !autoPortEnabled;
+        switchBody.classList.toggle("on", autoPortEnabled);
+      });
+
+      // Render History Dropdown
+      function renderDropdown() {
+        dropdownMenu.innerHTML = "";
+        if (!recentDirs || recentDirs.length === 0) {
+          dropdownMenu.innerHTML =
+            '<div style="padding:10px; color:var(--text-muted); font-size:12px; text-align:center;">暂无历史记录</div>';
+          return;
+        }
+        recentDirs.forEach((path) => {
+          const item = document.createElement("div");
+          item.className = "dropdown-item";
+          item.innerHTML = `
           <span>🕒</span>
           <span class="dropdown-item-path" title="${path}">${path}</span>
           <span class="delete-item-btn" title="删除此记录">×</span>
         `;
 
-        // Click on item body to select
-        item.addEventListener('click', async (e) => {
-          if (!e.target.classList.contains('delete-item-btn')) {
-            dirInput.value = path;
-            closeDropdown();
-            // 若服务正在运行，点击历史项自动热切换并重启到新目录
+          // Click on item body to select
+          item.addEventListener("click", async (e) => {
+            if (!e.target.classList.contains("delete-item-btn")) {
+              dirInput.value = path;
+              closeDropdown();
+              // 若服务正在运行，点击历史项自动热切换并重启到新目录
+              if (isRunning) {
+                await doStart(true);
+              }
+            }
+          });
+
+          // Click delete button
+          const deleteBtn = item.querySelector(".delete-item-btn");
+          deleteBtn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (window.pywebview && window.pywebview.api) {
+              const res = await window.pywebview.api.delete_history_item(path);
+              if (res && res.success) {
+                recentDirs = res.recent_dirs || [];
+                renderDropdown();
+                if (dirInput.value === path) {
+                  dirInput.value = recentDirs.length > 0 ? recentDirs[0] : "";
+                }
+                showToast("已移除历史目录", "🗑️");
+              }
+            }
+          });
+
+          dropdownMenu.appendChild(item);
+        });
+
+        // Clear all history footer
+        const footer = document.createElement("div");
+        footer.className = "dropdown-footer";
+        footer.innerHTML =
+          '<span class="clear-history-btn">清空全部历史</span>';
+        footer
+          .querySelector(".clear-history-btn")
+          .addEventListener("click", async (e) => {
+            e.stopPropagation();
+            if (window.pywebview && window.pywebview.api) {
+              const res = await window.pywebview.api.clear_history();
+              if (res && res.success) {
+                recentDirs = [];
+                renderDropdown();
+                showToast("已清空全部历史记录", "🗑️");
+              }
+            }
+          });
+        dropdownMenu.appendChild(footer);
+      }
+
+      function toggleDropdown() {
+        const isOpen = dropdownMenu.classList.contains("show");
+        if (isOpen) {
+          closeDropdown();
+        } else {
+          renderDropdown();
+          dropdownMenu.classList.add("show");
+          dropdownToggle.classList.add("open");
+        }
+      }
+
+      function closeDropdown() {
+        dropdownMenu.classList.remove("show");
+        dropdownToggle.classList.remove("open");
+      }
+
+      dropdownToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleDropdown();
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".dir-wrapper")) {
+          closeDropdown();
+        }
+      });
+
+      // Native File Dialog
+      browseBtn.addEventListener("click", async () => {
+        if (window.pywebview && window.pywebview.api) {
+          const folder = await window.pywebview.api.select_folder(
+            dirInput.value.trim(),
+          );
+          if (folder) {
+            dirInput.value = folder;
+            // 若服务当前处于运行状态，自动无缝热切换并重启到新目录
             if (isRunning) {
               await doStart(true);
             }
           }
-        });
-
-        // Click delete button
-        const deleteBtn = item.querySelector('.delete-item-btn');
-        deleteBtn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          if (window.pywebview && window.pywebview.api) {
-            const res = await window.pywebview.api.delete_history_item(path);
-            if (res && res.success) {
-              recentDirs = res.recent_dirs || [];
-              renderDropdown();
-              if (dirInput.value === path) {
-                dirInput.value = recentDirs.length > 0 ? recentDirs[0] : '';
-              }
-              showToast('已移除历史目录', '🗑️');
-            }
-          }
-        });
-
-        dropdownMenu.appendChild(item);
+        }
       });
 
-      // Clear all history footer
-      const footer = document.createElement('div');
-      footer.className = 'dropdown-footer';
-      footer.innerHTML = '<span class="clear-history-btn">清空全部历史</span>';
-      footer.querySelector('.clear-history-btn').addEventListener('click', async (e) => {
-        e.stopPropagation();
+      // Copy Link
+      copyBtn.addEventListener("click", () => {
+        if (!isRunning) return;
+        const url = `http://127.0.0.1:${currentPort}`;
+        navigator.clipboard.writeText(url).then(() => {
+          showToast("已复制访问链接！", "📋");
+        });
+      });
+
+      // Open in Browser
+      openBtn.addEventListener("click", () => {
+        if (!isRunning) return;
         if (window.pywebview && window.pywebview.api) {
-          const res = await window.pywebview.api.clear_history();
-          if (res && res.success) {
-            recentDirs = [];
-            renderDropdown();
-            showToast('已清空全部历史记录', '🗑️');
-          }
+          window.pywebview.api.open_browser(currentPort);
         }
       });
-      dropdownMenu.appendChild(footer);
-    }
 
-    function toggleDropdown() {
-      const isOpen = dropdownMenu.classList.contains('show');
-      if (isOpen) {
-        closeDropdown();
-      } else {
-        renderDropdown();
-        dropdownMenu.classList.add('show');
-        dropdownToggle.classList.add('open');
-      }
-    }
-
-    function closeDropdown() {
-      dropdownMenu.classList.remove('show');
-      dropdownToggle.classList.remove('open');
-    }
-
-    dropdownToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleDropdown();
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.dir-wrapper')) {
-        closeDropdown();
-      }
-    });
-
-    // Native File Dialog
-    browseBtn.addEventListener('click', async () => {
-      if (window.pywebview && window.pywebview.api) {
-        const folder = await window.pywebview.api.select_folder(dirInput.value.trim());
-        if (folder) {
-          dirInput.value = folder;
-          // 若服务当前处于运行状态，自动无缝热切换并重启到新目录
-          if (isRunning) {
-            await doStart(true);
-          }
+      urlDisplay.addEventListener("click", () => {
+        if (isRunning && window.pywebview && window.pywebview.api) {
+          window.pywebview.api.open_browser(currentPort);
         }
-      }
-    });
-
-    // Copy Link
-    copyBtn.addEventListener('click', () => {
-      if (!isRunning) return;
-      const url = `http://127.0.0.1:${currentPort}`;
-      navigator.clipboard.writeText(url).then(() => {
-        showToast('已复制访问链接！', '📋');
       });
-    });
 
-    // Open in Browser
-    openBtn.addEventListener('click', () => {
-      if (!isRunning) return;
-      if (window.pywebview && window.pywebview.api) {
-        window.pywebview.api.open_browser(currentPort);
-      }
-    });
-
-    urlDisplay.addEventListener('click', () => {
-      if (isRunning && window.pywebview && window.pywebview.api) {
-        window.pywebview.api.open_browser(currentPort);
-      }
-    });
-
-    // Execute Start
-    async function doStart(isRestart = false) {
-      const dir = dirInput.value.trim();
-      if (!dir) {
-        showToast('请先选择静态文件目录！', '⚠️');
-        return false;
-      }
-
-      const port = parseInt(portInput.value.trim());
-      if (isNaN(port) || port < 1 || port > 65535) {
-        showToast('请输入有效端口 (1-65535)！', '⚠️');
-        return false;
-      }
-
-      heroBtn.disabled = true;
-      heroText.innerText = isRestart ? '正在重启...' : '正在启动...';
-
-      if (window.pywebview && window.pywebview.api) {
-        const res = await window.pywebview.api.start_server(dir, port, autoPortEnabled);
-        if (res.success) {
-          isRunning = true;
-          currentPort = res.port;
-          portInput.value = currentPort;
-
-          // Transform to Running State
-          statusDot.classList.add('active');
-          statusText.innerText = `运行中 (${currentPort})`;
-          statusText.style.color = 'var(--success)';
-          safariIcon.innerText = '🔒';
-          urlDisplay.innerText = `http://127.0.0.1:${currentPort}`;
-          urlDisplay.classList.add('active');
-          copyBtn.disabled = false;
-          openBtn.disabled = false;
-
-          // Hero Button morph to Stop
-          heroBtn.disabled = false;
-          heroBtn.className = 'hero-btn stop';
-          heroIcon.innerText = '⏹';
-          heroText.innerText = '停止服务';
-          restartBtn.style.display = 'inline-flex';
-
-          if (res.port_switched) {
-            showToast(`端口 ${port} 占用，已切换至 ${res.port}`, '💡');
-          } else if (isRestart) {
-            showToast('已切换目录并重启服务！', '🔄');
-          } else {
-            showToast('服务已成功启动！', '🚀');
-          }
-
-          recentDirs = res.recent_dirs || recentDirs;
-          return true;
-        } else {
-          heroBtn.disabled = false;
-          heroBtn.className = 'hero-btn start';
-          heroIcon.innerText = '▶';
-          heroText.innerText = '启动服务';
-          restartBtn.style.display = 'none';
-
-          if (res.suggest_dir) {
-            dirInput.value = res.suggest_dir;
-            showToast(res.message, '💡');
-          } else {
-            showToast(res.message || '启动失败！', '⚠️');
-          }
+      // Execute Start
+      async function doStart(isRestart = false) {
+        const dir = dirInput.value.trim();
+        if (!dir) {
+          showToast("请先选择静态文件目录！", "⚠️");
           return false;
         }
-      }
-      return false;
-    }
 
-    // Execute Stop
-    async function doStop() {
-      if (window.pywebview && window.pywebview.api) {
-        const res = await window.pywebview.api.stop_server();
-        if (res.success) {
-          isRunning = false;
-          statusDot.classList.remove('active');
-          statusText.innerText = '已停止';
-          statusText.style.color = 'var(--text-muted)';
-          safariIcon.innerText = '🌐';
-          urlDisplay.innerText = '服务已停止';
-          urlDisplay.classList.remove('active');
-          copyBtn.disabled = true;
-          openBtn.disabled = true;
-
-          // Hero Button morph back to Start
-          heroBtn.disabled = false;
-          heroBtn.className = 'hero-btn start';
-          heroIcon.innerText = '▶';
-          heroText.innerText = '启动服务';
-          restartBtn.style.display = 'none';
-
-          showToast('服务已安全停止', '⏹');
-          return true;
+        const port = parseInt(portInput.value.trim());
+        if (isNaN(port) || port < 1 || port > 65535) {
+          showToast("请输入有效端口 (1-65535)！", "⚠️");
+          return false;
         }
-      }
-      return false;
-    }
 
-    // Hero Button Click (Toggle Start / Stop)
-    heroBtn.addEventListener('click', async () => {
-      if (!isRunning) {
-        await doStart();
-      } else {
-        await doStop();
-      }
-    });
-
-    // Restart Button Click
-    restartBtn.addEventListener('click', async () => {
-      if (!isRunning) return;
-      await doStart(true);
-    });
-
-    // Export Standalone EXE Button Click
-    exportBtn.addEventListener('click', async () => {
-      const dir = dirInput.value.trim();
-      if (!dir) {
-        showToast('请先选择要导出的静态目录！', '⚠️');
-        return;
-      }
-
-      const port = parseInt(portInput.value.trim()) || 8080;
-      const folderName = dir.split(/[\\/]/).filter(Boolean).pop() || '项目原型';
-      const defaultExeName = `${folderName}_原型演示.exe`;
-
-      if (window.pywebview && window.pywebview.api) {
-        const savePath = await window.pywebview.api.save_file_dialog(defaultExeName);
-        if (!savePath) return;
-
-        exportBtn.disabled = true;
         heroBtn.disabled = true;
-        exportIcon.innerText = '⏳';
-        exportText.innerText = '正在封包...';
-        showToast('正在封装单文件独立 EXE，请稍候...', '📦');
+        heroText.innerText = isRestart ? "正在重启..." : "正在启动...";
 
-        try {
-          const res = await window.pywebview.api.export_standalone_exe(dir, savePath, folderName, port);
-          if (res && res.success) {
-            showToast('🎉 独立演示程序已导出成功！', '✓');
+        if (window.pywebview && window.pywebview.api) {
+          const res = await window.pywebview.api.start_server(
+            dir,
+            port,
+            autoPortEnabled,
+          );
+          if (res.success) {
+            isRunning = true;
+            currentPort = res.port;
+            portInput.value = currentPort;
+
+            // Transform to Running State
+            statusDot.classList.add("active");
+            statusText.innerText = `运行中 (${currentPort})`;
+            statusText.style.color = "var(--success)";
+            safariIcon.innerText = "🔒";
+            urlDisplay.innerText = `http://127.0.0.1:${currentPort}`;
+            urlDisplay.classList.add("active");
+            copyBtn.disabled = false;
+            openBtn.disabled = false;
+
+            // Hero Button morph to Stop
+            heroBtn.disabled = false;
+            heroBtn.className = "hero-btn stop";
+            heroIcon.innerText = "⏹";
+            heroText.innerText = "停止服务";
+            restartBtn.style.display = "inline-flex";
+
+            if (res.port_switched) {
+              showToast(`端口 ${port} 占用，已切换至 ${res.port}`, "💡");
+            } else if (isRestart) {
+              showToast("已切换目录并重启服务！", "🔄");
+            } else {
+              showToast("服务已成功启动！", "🚀");
+            }
+
+            recentDirs = res.recent_dirs || recentDirs;
+            return true;
           } else {
-            showToast(res.message || '导出失败！', '❌');
-          }
-        } catch (err) {
-          showToast('导出发生异常: ' + err, '❌');
-        } finally {
-          exportBtn.disabled = false;
-          heroBtn.disabled = false;
-          exportIcon.innerText = '📦';
-          exportText.innerText = '导出独立 EXE';
-        }
-      }
-    });
+            heroBtn.disabled = false;
+            heroBtn.className = "hero-btn start";
+            heroIcon.innerText = "▶";
+            heroText.innerText = "启动服务";
+            restartBtn.style.display = "none";
 
-    // Initialize from Python Backend
-    window.addEventListener('pywebviewready', async () => {
-      if (window.pywebview && window.pywebview.api) {
-        const config = await window.pywebview.api.get_config();
-        if (config) {
-          recentDirs = config.recent_dirs || [];
-          if (recentDirs.length > 0) {
-            dirInput.value = recentDirs[0];
-          }
-          if (config.last_port) {
-            portInput.value = config.last_port;
-            currentPort = config.last_port;
-          }
-          if (config.auto_port !== undefined) {
-            autoPortEnabled = config.auto_port;
-            switchBody.classList.toggle('on', autoPortEnabled);
+            if (res.suggest_dir) {
+              dirInput.value = res.suggest_dir;
+              showToast(res.message, "💡");
+            } else {
+              showToast(res.message || "启动失败！", "⚠️");
+            }
+            return false;
           }
         }
+        return false;
       }
-    });
-  </script>
-</body>
+
+      // Execute Stop
+      async function doStop() {
+        if (window.pywebview && window.pywebview.api) {
+          const res = await window.pywebview.api.stop_server();
+          if (res.success) {
+            isRunning = false;
+            statusDot.classList.remove("active");
+            statusText.innerText = "已停止";
+            statusText.style.color = "var(--text-muted)";
+            safariIcon.innerText = "🌐";
+            urlDisplay.innerText = "服务已停止";
+            urlDisplay.classList.remove("active");
+            copyBtn.disabled = true;
+            openBtn.disabled = true;
+
+            // Hero Button morph back to Start
+            heroBtn.disabled = false;
+            heroBtn.className = "hero-btn start";
+            heroIcon.innerText = "▶";
+            heroText.innerText = "启动服务";
+            restartBtn.style.display = "none";
+
+            showToast("服务已安全停止", "⏹");
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // Hero Button Click (Toggle Start / Stop)
+      heroBtn.addEventListener("click", async () => {
+        if (!isRunning) {
+          await doStart();
+        } else {
+          await doStop();
+        }
+      });
+
+      // Restart Button Click
+      restartBtn.addEventListener("click", async () => {
+        if (!isRunning) return;
+        await doStart(true);
+      });
+
+      // Export Standalone EXE Button Click
+      exportBtn.addEventListener("click", async () => {
+        const dir = dirInput.value.trim();
+        if (!dir) {
+          showToast("请先选择要导出的静态目录！", "⚠️");
+          return;
+        }
+
+        const port = parseInt(portInput.value.trim()) || 8080;
+        const folderName =
+          dir.split(/[\\/]/).filter(Boolean).pop() || "项目原型";
+        const defaultExeName = `${folderName}_原型演示.exe`;
+
+        if (window.pywebview && window.pywebview.api) {
+          const savePath =
+            await window.pywebview.api.save_file_dialog(defaultExeName);
+          if (!savePath) return;
+
+          exportBtn.disabled = true;
+          heroBtn.disabled = true;
+          exportIcon.innerText = "⏳";
+          exportText.innerText = "正在封包...";
+          showToast("正在封装单文件独立 EXE，请稍候...", "📦");
+
+          try {
+            const res = await window.pywebview.api.export_standalone_exe(
+              dir,
+              savePath,
+              folderName,
+              port,
+            );
+            if (res && res.success) {
+              showToast("🎉 独立演示程序已导出成功！", "✓");
+            } else {
+              showToast(res.message || "导出失败！", "❌");
+            }
+          } catch (err) {
+            showToast("导出发生异常: " + err, "❌");
+          } finally {
+            exportBtn.disabled = false;
+            heroBtn.disabled = false;
+            exportIcon.innerText = "📦";
+            exportText.innerText = "导出独立 EXE";
+          }
+        }
+      });
+
+      // Initialize from Python Backend
+      window.addEventListener("pywebviewready", async () => {
+        if (window.pywebview && window.pywebview.api) {
+          const config = await window.pywebview.api.get_config();
+          if (config) {
+            recentDirs = config.recent_dirs || [];
+            if (recentDirs.length > 0) {
+              dirInput.value = recentDirs[0];
+            }
+            if (config.last_port) {
+              portInput.value = config.last_port;
+              currentPort = config.last_port;
+            }
+            if (config.auto_port !== undefined) {
+              autoPortEnabled = config.auto_port;
+              switchBody.classList.toggle("on", autoPortEnabled);
+            }
+          }
+        }
+      });
+    </script>
+  </body>
 </html>
