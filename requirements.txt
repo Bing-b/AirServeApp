@@ -1,2 +1,2 @@
-customtkinter
+pywebview>=5.0.0
 pyinstaller
