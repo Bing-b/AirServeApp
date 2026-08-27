@@ -795,7 +795,6 @@
 
     // Toggle Auto Port Switch
     autoPortToggle.addEventListener('click', () => {
-      if (isRunning) return;
       autoPortEnabled = !autoPortEnabled;
       switchBody.classList.toggle('on', autoPortEnabled);
     });
@@ -817,10 +816,14 @@
         `;
 
         // Click on item body to select
-        item.addEventListener('click', (e) => {
+        item.addEventListener('click', async (e) => {
           if (!e.target.classList.contains('delete-item-btn')) {
             dirInput.value = path;
             closeDropdown();
+            // 若服务正在运行，点击历史项自动热切换并重启到新目录
+            if (isRunning) {
+              await doStart(true);
+            }
           }
         });
 
@@ -891,11 +894,14 @@
 
     // Native File Dialog
     browseBtn.addEventListener('click', async () => {
-      if (isRunning) return;
       if (window.pywebview && window.pywebview.api) {
         const folder = await window.pywebview.api.select_folder(dirInput.value.trim());
         if (folder) {
           dirInput.value = folder;
+          // 若服务当前处于运行状态，自动无缝热切换并重启到新目录
+          if (isRunning) {
+            await doStart(true);
+          }
         }
       }
     });
@@ -964,14 +970,10 @@
           heroText.innerText = '停止服务';
           restartBtn.style.display = 'inline-flex';
 
-          dirInput.disabled = true;
-          portInput.disabled = true;
-          browseBtn.disabled = true;
-
           if (res.port_switched) {
             showToast(`端口 ${port} 占用，已切换至 ${res.port}`, '💡');
           } else if (isRestart) {
-            showToast('服务已重新启动！', '🔄');
+            showToast('已切换目录并重启服务！', '🔄');
           } else {
             showToast('服务已成功启动！', '🚀');
           }
@@ -1018,10 +1020,6 @@
           heroIcon.innerText = '▶';
           heroText.innerText = '启动服务';
           restartBtn.style.display = 'none';
-
-          dirInput.disabled = false;
-          portInput.disabled = false;
-          browseBtn.disabled = false;
 
           showToast('服务已安全停止', '⏹');
           return true;
