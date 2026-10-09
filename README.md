@@ -4,15 +4,15 @@
 
   # AirServe
 
-  **极简、优雅的本地原型交付与静态 Web 服务工具**
+  **轻量本地静态 Web 服务器，支持一键导出单文件便携 EXE**
   
-  *现代极简设计 · 零依赖即开即用 · 一键导出单文件独立原型 EXE*
+  *免配置即开即用 · 自动避让可用端口 · SPA 路由支持 · 单文件免安装交付*
 
   <p align="center">
     <a href="https://github.com/Bing-b/AirServerApp/releases"><img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-007AFF?style=flat-square" alt="Platform"></a>
-    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
+    <a href="https://github.com/svenstaro/miniserve"><img src="https://img.shields.io/badge/Core-Miniserve%20(Rust)-DEA584?style=flat-square&logo=rust" alt="Miniserve"></a>
     <a href="https://pywebview.flowrl.com/"><img src="https://img.shields.io/badge/GUI-PyWebView%205.0-34C759?style=flat-square" alt="GUI"></a>
-    <a href="https://github.com/svenstaro/miniserve"><img src="https://img.shields.io/badge/Core-Miniserve%20Rust-DEA584?style=flat-square&logo=rust" alt="Miniserve"></a>
+    <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square" alt="License"></a>
   </p>
 
@@ -20,7 +20,7 @@
 
 ---
 
-## 📸 应用预览 (Screenshot)
+## 应用预览
 
 <div align="center">
   <img src="airServer.png" alt="AirServe 软件界面截图" width="700" style="border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15); margin: 16px 0;" />
@@ -28,102 +28,98 @@
 
 ---
 
-## 💡 为什么选择 AirServe？
+## 为什么需要 AirServe？
 
-在日常研发与产品交付场景中，产品经理、UI/UX 设计师或前端工程师经常需要向客户、领导或投资人演示 **AI 生成的原型、Vite/React/Vue 构建产物或 Axure HTML**。
+在日常开发、原型演示或给客户交付前端页面时，常常遇到这些麻烦：
 
-传统方式面临诸多痛点：
-- ❌ 客户电脑没有 Node.js / Python 环境，无法启动本地服务器；
-- ❌ 直接用浏览器双击 `index.html` 会触发跨域（CORS）与路由失效（SPA 404）；
-- ❌ 发给客户一个包含成百上千碎文件的 zip 压缩包，客户容易解压错或找不到入口；
-- ❌ 命令行工具界面粗糙、缺少按压反馈，易发生端口冲突或后台残留孤儿进程。
+- **客户电脑缺少环境**：非技术人员或客户电脑通常没有 Node.js、Python 或 Nginx，无法直接启动本地服务。
+- **浏览器直接打开报错**：直接双击 `index.html` 受限于浏览器安全策略，容易触发跨域（CORS）报错或 SPA 路由 404。
+- **散装文件传输繁琐**：打包成 zip 发送，对方容易漏解压、找不到入口文件或解压路径错乱。
+- **命令行起服务体验不便**：终端工具容易遭遇端口占用冲突，且关闭窗口后后台进程容易残留。
 
-**AirServe 为此而生**：它不仅是一款拥有 **现代毛玻璃质感** 的本地轻量服务器，更是一套专为 **高保真原型交付** 设计的桌面工具。
+**AirServe 兼具两种使用场景**：
+1. **日常自用**：拖入静态网页目录，自动寻找可用端口，一键拉起 Web 服务；
+2. **对外交付**：一键将整个前端项目打包为单文件 `.exe`，发给客户直接双击就能看，无需安装任何软件。
 
 ---
 
-## ✨ 核心特性
+## 核心特性
 
 | 功能特性 | 说明 |
 | :--- | :--- |
-| 💎 **现代毛玻璃质感 UI** | 采用现代桌面级设计语言，支持浅色/深色自适应主题、背景高斯模糊 (`Backdrop Blur`) 与微交互弹性动画。 |
-| 📦 **一键导出单文件独立 EXE** | 选定静态目录，**1 秒生成完全独立的单文件 `.exe`**。客户电脑无需安装任何环境，双击直接运行并自动弹出浏览器演示。 |
-| 🎮 **智能二合一主控 (Scheme A)** | 宽幅呼吸发光主控按钮，启动后平滑形变为停止态，并自动滑出次级 `🔄` 一键重启按钮。 |
-| 🔌 **智能端口冲突检测** | 自由设定端口；若目标端口被占用，支持**智能毫秒级自动递增切换**至空闲端口，彻底告别冲突。 |
-| 🕒 **历史路径记忆与精准管理** | 自动记录历史使用目录，支持下拉列表一键切换、单条精准删除 (`×`) 与一键彻底清空。 |
-| 🛡️ **入口文件校验与智能定位** | 启动前自动检查 `index.html`；若用户误选项目根目录，将自动探测并修正为 `dist/` 或 `build/` 子路径。 |
-| 🌐 **智能地址状态胶囊** | 集成带呼吸脉冲的实时状态指示、一键复制访问链接与快速直达浏览器。 |
-| ⚡ **SPA 单页应用原生支持** | 默认开启 `--spa` 路由回退并内置强效防缓存请求头，完美适配 Vue Router / React Router。 |
-| 🧹 **全生命周期进程安全** | 绑定窗口关闭事件与全局退出钩子，退出时递归销毁子进程树 (`taskkill /F /T`)，绝无后台残留。 |
+| **开箱即用静态服务** | 选择或拖入包含 `index.html` 的目录，秒级启动本地 HTTP 服务。 |
+| **一键导出单文件 EXE** | 将整个静态项目封包成一个独立的 `.exe`。接收方双击直接运行并自动弹出浏览器，无任何外部依赖。 |
+| **自动避让可用端口** | 自由指定端口；若遇端口占用，自动递增寻找可用端口，避免启动冲突报错。 |
+| **SPA 单页应用原生支持** | 默认启用单页应用路由回退 (`--spa`) 与防缓存请求头，完美适配 Vue Router / React Router。 |
+| **轻量高效，非 Electron** | 服务内核基于 Rust 构建的 [Miniserve](https://github.com/svenstaro/miniserve)，界面调用系统原生 WebView，拒绝臃肿体积与高内存占用。 |
+| **入口文件智能定位** | 误选项目根目录时，自动探测并定位 `dist/` 或 `build/` 子目录下的 `index.html`。 |
+| **历史目录记忆与管理** | 自动记录常用目录，支持快捷切换选择与历史记录单独清理。 |
+| **干净退出无后台残留** | 退出窗口时自动递归销毁关联子进程，不占用后台端口和系统资源。 |
 
 ---
 
-## 🎯 典型场景：产品经理原型交付工作流
+## 典型场景：原型交付工作流
 
-```mermaid
-graph LR
-    A[AI 生成原型 / 前端构建] --> B[选定 dist 静态目录]
-    B --> C[点击 '📦 导出独立 EXE']
-    C --> D[生成 某某项目原型.exe]
-    D --> E[发给客户 / 投资人]
-    E --> F[客户双击秒开体验]
-```
+<div align="center">
+  <img src="workflow.png" alt="AirServe 原型交付工作流" width="700" style="border-radius: 12px; margin: 16px 0;" />
+</div>
 
-1. **导出**：产品经理选择包含 `index.html` 的原型目录，点击 **“📦 导出独立 EXE”**。
-2. **交付**：将生成的单个 `.exe` 文件（如 `智慧园区原型演示.exe`）通过微信/邮件直接发送给客户。
-3. **演示**：客户双击运行，程序自动拉起微服务并在默认浏览器中加载页面；关闭控制框自动退出，零系统残留。
+1. **选择目录**：选择包含前端构建产物（如 `dist/`）的文件夹；
+2. **一键导出**：点击 **“导出独立 EXE”**，生成一个便携单文件；
+3. **分发演示**：将单个 `.exe` 发送给客户或领导，对方双击即可体验，关闭窗口即停止，干净省心。
 
 ---
 
-## 🚀 快速开始
+## 获取与运行
 
-### 源码运行
+### 方式一：直接下载运行（推荐，免安装）
 
-1. **克隆仓库**：
+直接前往 [Releases 页面](https://github.com/Bing-b/AirServerApp/releases) 下载最新发行版：
+- **Windows**：下载 `AirServe.exe`，免安装直接运行。
+- **macOS**：下载 `AirServe.app`。
+
+---
+
+### 方式二：从源码运行（开发者）
+
+如果你想进行二次开发或本地调试：
+
+1. **克隆代码**：
    ```bash
    git clone https://github.com/Bing-b/AirServerApp.git
    cd AirServerApp
    ```
 
-2. **安装依赖**：
+2. **安装 Python 依赖**：
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **启动程序**：
+3. **启动应用**：
    ```bash
    python main.py
    ```
 
 ---
 
-## 📦 独立客户端打包
+## 本地构建打包
 
 项目内置了针对 Windows 与 macOS 的一键全量打包脚本：
 
-### 🪟 Windows (.exe)：
+### Windows (.exe)
 ```cmd
 build_win.bat
 ```
 构建产物位于 `dist/AirServe.exe`，免安装直接运行。
 
-### 💻 macOS (.app)：
+### macOS (.app)
 ```bash
 chmod +x build_mac.sh && ./build_mac.sh
 ```
-构建产物位于 `dist/AirServe.app`，适配 Apple Silicon 与 Intel 架构芯片。
+构建产物位于 `dist/AirServe.app`。
 
 ---
 
-## 🛠️ 技术架构
-
-- **GUI 渲染容器**：[PyWebView 5.0+](https://pywebview.flowrl.com/)（调用系统原生 Edge WebView2 / WebKit，无需打包笨重 Chromium）
-- **UI 前端界面**：HTML5 + Modern Vanilla CSS3（无第三方打包体积开销）
-- **高性能服务内核**：[Miniserve](https://github.com/svenstaro/miniserve)（Rust 高性能轻量静态服务器）
-- **跨平台独立封包引擎**：PyInstaller 6.0+ 单文件沙盒打包技术
-
----
-
-## 📄 开源许可证
+## 开源许可证
 
 本项目基于 [MIT License](LICENSE) 开源发布。
