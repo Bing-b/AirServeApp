@@ -23,7 +23,7 @@
 ## 应用预览
 
 <div align="center">
-  <img src="airServer.png" alt="AirServe 软件界面截图" width="700" style="border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15); margin: 16px 0;" />
+  <img src="airServer.png" alt="AirServe 软件界面截图" width="480" style="border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15); margin: 16px 0;" />
 </div>
 
 ---
