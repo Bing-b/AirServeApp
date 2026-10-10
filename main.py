@@ -181,22 +181,7 @@ class Api:
         os.makedirs(build_tmp, exist_ok=True)
 
         try:
-            # 1. 复制 runner_template 并注入参数
-            template_path = os.path.join(BASE_PATH, "runner_template.py")
-            if not os.path.exists(template_path):
-                return {"success": False, "message": "找不到 runner_template.py 模板文件！"}
-
-            with open(template_path, "r", encoding="utf-8") as f:
-                runner_code = f.read()
-
-            runner_code = runner_code.replace('PROJECT_NAME = "项目原型演示"', f'PROJECT_NAME = {repr(project_name)}')
-            runner_code = runner_code.replace('DEFAULT_PORT = 8080', f'DEFAULT_PORT = {port}')
-
-            runner_target = os.path.join(build_tmp, "runner.py")
-            with open(runner_target, "w", encoding="utf-8") as f:
-                f.write(runner_code)
-
-            # 2. 复制 bin 目录
+            # 1. 复制 bin 目录
             bin_target = os.path.join(build_tmp, "bin")
             os.makedirs(bin_target, exist_ok=True)
             miniserve_src = get_executable_path(BASE_PATH)
@@ -204,11 +189,11 @@ class Api:
                 return {"success": False, "message": "找不到 miniserve 内核可执行程序！"}
             shutil.copy2(miniserve_src, os.path.join(bin_target, os.path.basename(miniserve_src)))
 
-            # 3. 复制静态文件目录为 site
+            # 2. 复制静态文件目录为 site
             site_target = os.path.join(build_tmp, "site")
             shutil.copytree(target_dir, site_target, dirs_exist_ok=True)
 
-            # 4. 复制图标
+            # 3. 复制图标
             ico_src = os.path.join(BASE_PATH, "gui", "logo.ico")
             if not os.path.exists(ico_src):
                 ico_src = os.path.join(BASE_PATH, "logo.ico")
@@ -216,45 +201,120 @@ class Api:
             if os.path.exists(ico_src):
                 shutil.copy2(ico_src, ico_target)
 
-            # 5. 调用 PyInstaller 执行单文件构建
-            pyinstaller_cmd = [
-                sys.executable, "-m", "PyInstaller",
-                "-y",
-                "-F",
-                "-w",
-                "--clean",
-                "--name", "demo_bundle",
-                "--add-data", f"{bin_target};bin",
-                "--add-data", f"{site_target};site",
+            # 4. 把 bin 和 site 打包成资源 payload.zip
+            import zipfile
+            payload_zip = os.path.join(build_tmp, "payload.zip")
+            with zipfile.ZipFile(payload_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
+                for folder in ['bin', 'site']:
+                    folder_path = os.path.join(build_tmp, folder)
+                    for root, _, files in os.walk(folder_path):
+                        for f in files:
+                            abs_path = os.path.join(root, f)
+                            rel_path = os.path.relpath(abs_path, build_tmp)
+                            zf.write(abs_path, rel_path)
+
+            # 5. 生成原生启动器 C# 源码
+            cs_code = """
+using System;
+using System.IO;
+using System.IO.Compression;
+using System.Diagnostics;
+using System.Reflection;
+using System.Windows.Forms;
+using System.Threading;
+using System.Net;
+using System.Net.Sockets;
+
+namespace AirServeRunner {
+    static class Program {
+        static int GetAvailablePort(int startingPort) {
+            int port = startingPort;
+            while (port < 65535) {
+                try {
+                    using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)) {
+                        socket.Bind(new IPEndPoint(IPAddress.Loopback, port));
+                        return port;
+                    }
+                } catch {
+                    port++;
+                }
+            }
+            return startingPort;
+        }
+
+        [STAThread]
+        static void Main() {
+            string tempDir = Path.Combine(Path.GetTempPath(), "airserve_" + Guid.NewGuid().ToString().Substring(0, 8));
+            try {
+                int targetPort = GetAvailablePort(PORT_PLACEHOLDER);
+                Directory.CreateDirectory(tempDir);
+                string zipPath = Path.Combine(tempDir, "payload.zip");
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip"))
+                using (FileStream fileStream = new FileStream(zipPath, FileMode.Create)) {
+                    stream.CopyTo(fileStream);
+                }
+                
+                ZipFile.ExtractToDirectory(zipPath, tempDir);
+                
+                string miniservePath = Path.Combine(tempDir, "bin", "miniserve-win.exe");
+                Process miniserve = Process.Start(new ProcessStartInfo {
+                    FileName = miniservePath,
+                    Arguments = "--index index.html --spa --port " + targetPort + " site",
+                    WorkingDirectory = tempDir,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true
+                });
+                
+                Thread.Sleep(500);
+                Process.Start("http://127.0.0.1:" + targetPort + "/?t=" + DateTimeOffset.Now.ToUnixTimeSeconds());
+                
+                MessageBox.Show("【NAME_PLACEHOLDER】原型演示服务运行中！\\n\\n🌐 访问地址：http://127.0.0.1:" + targetPort + "\\n\\n提示：页面已在默认浏览器中打开。\\n点击【确定】退出并停止本地服务。", "AirServe", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
+                try { miniserve.Kill(); } catch {}
+            } catch (Exception ex) {
+                MessageBox.Show("启动失败: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } finally {
+                try { Directory.Delete(tempDir, true); } catch {}
+            }
+        }
+    }
+}
+"""
+            cs_code = cs_code.replace("PORT_PLACEHOLDER", str(port))
+            cs_code = cs_code.replace("NAME_PLACEHOLDER", project_name.replace('"', '\\"'))
+            cs_path = os.path.join(build_tmp, "stub.cs")
+            with open(cs_path, "w", encoding="utf-8") as f:
+                f.write(cs_code)
+                
+            # 6. 调用 Windows 系统自带的 csc.exe 编译为独立 EXE
+            csc_path = r"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+            if not os.path.exists(csc_path):
+                csc_path = r"C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe"
+                
+            if not os.path.exists(csc_path):
+                return {"success": False, "message": "未找到系统的 C# 编译器 (csc.exe)，无法生成原生 EXE。"}
+                
+            compile_cmd = [
+                csc_path,
+                "/nologo",
+                "/target:winexe",
+                f"/out:{save_path}",
+                "/reference:System.IO.Compression.FileSystem.dll",
+                "/reference:System.Windows.Forms.dll",
+                f"/resource:{payload_zip}",
+                "/optimize"
             ]
             if os.path.exists(ico_target):
-                pyinstaller_cmd.extend(["--icon", ico_target])
-            pyinstaller_cmd.append(runner_target)
-
+                compile_cmd.append(f"/win32icon:{ico_target}")
+            compile_cmd.append(cs_path)
+            
             creationflags = subprocess.CREATE_NO_WINDOW if platform.system() == "Windows" else 0
-            proc = subprocess.run(
-                pyinstaller_cmd,
-                cwd=build_tmp,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                creationflags=creationflags,
-                text=True,
-                encoding="utf-8",
-                errors="ignore"
-            )
-
+            proc = subprocess.run(compile_cmd, cwd=build_tmp, capture_output=True, text=True, errors="ignore", creationflags=creationflags)
             if proc.returncode != 0:
-                return {"success": False, "message": f"构建失败:\n{proc.stderr[:300]}"}
-
-            dist_exe = os.path.join(build_tmp, "dist", "demo_bundle.exe")
-            if not os.path.exists(dist_exe):
-                return {"success": False, "message": "打包成功但未找到输出产物！"}
-
-            # 6. 将生成的 exe 移动至用户指定的保存路径
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            if os.path.exists(save_path):
-                os.remove(save_path)
-            shutil.move(dist_exe, save_path)
+                return {"success": False, "message": f"生成原生 EXE 失败:\\n{proc.stdout}\\n{proc.stderr}"}
+            
+            if not os.path.exists(save_path):
+                return {"success": False, "message": "编译成功但未找到输出产物！"}
 
             # 7. 自动在 Windows 资源管理器中选中高亮生成的文件
             if platform.system() == "Windows":
@@ -265,7 +325,7 @@ class Api:
 
             return {
                 "success": True,
-                "message": f"独立演示程序导出成功！",
+                "message": f"纯净单文件 EXE 导出成功！",
                 "output_path": save_path
             }
 
