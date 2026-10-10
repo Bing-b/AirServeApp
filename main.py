@@ -154,6 +154,9 @@ class Api:
 
     def export_standalone_exe(self, target_dir: str, save_path: str, project_name: str, port: int) -> dict:
         """一键封包生成独立的单文件 EXE 原型演示程序"""
+        if platform.system() != "Windows":
+            return {"success": False, "message": "⚠️ 抱歉，生成单文件 EXE 功能依赖 Windows 底层原生编译器，目前该功能已被 Mac 系统屏蔽！请在 Windows 环境下打包。"}
+            
         target_dir = os.path.normpath(target_dir.strip())
         if not os.path.exists(target_dir) or not os.path.isdir(target_dir):
             return {"success": False, "message": "静态文件目录不存在！"}
