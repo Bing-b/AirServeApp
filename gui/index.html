@@ -119,6 +119,15 @@
         padding: 14px 16px;
         margin-bottom: 12px;
         box-shadow: var(--shadow);
+        position: relative;
+      }
+
+      .card-config {
+        z-index: 20;
+      }
+
+      .card-status {
+        z-index: 1;
       }
 
       .card-title {
@@ -155,6 +164,7 @@
       .dir-wrapper {
         position: relative;
         flex: 1;
+        z-index: 50;
       }
 
       .custom-input-box {
@@ -705,7 +715,7 @@
     </div>
 
     <!-- Configuration Card -->
-    <div class="card">
+    <div class="card card-config">
       <div class="card-title">⚙️ 服务配置</div>
 
       <!-- Directory Row -->
@@ -759,7 +769,7 @@
     </div>
 
     <!-- Status & Controls Card -->
-    <div class="card">
+    <div class="card card-status">
       <div class="status-header">
         <div class="card-title" style="margin-bottom: 0">🌐 运行状态</div>
         <div class="status-pill">
