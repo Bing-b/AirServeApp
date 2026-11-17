@@ -76,7 +76,7 @@
 
 直接前往 [Releases 页面](https://github.com/Bing-b/AirServerApp/releases) 下载最新发行版：
 - **Windows**：下载 `AirServe.exe`，免安装直接运行。
-- **macOS**：下载 `AirServe.app`。
+- <!-- **macOS**：下载 `AirServe.app`（暂未实机测试，待后续开放） -->
 
 ---
 
@@ -112,11 +112,13 @@ build_win.bat
 ```
 构建产物位于 `dist/AirServe.exe`，免安装直接运行。
 
-### macOS (.app)
+<!--
+### macOS (.app) [暂无实机测试环境，暂时注释挂起]
 ```bash
 chmod +x build_mac.sh && ./build_mac.sh
 ```
 构建产物位于 `dist/AirServe.app`。
+-->
 
 ---
 

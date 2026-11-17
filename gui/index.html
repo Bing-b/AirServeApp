@@ -103,6 +103,23 @@
         letter-spacing: 0.5px;
       }
 
+      .footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-top: auto;
+        padding-right: 4px;
+      }
+
+      .version-text {
+        font-size: 11px;
+        color: var(--text-muted);
+        opacity: 0.65;
+        letter-spacing: 0.4px;
+        font-family: -apple-system, BlinkMacSystemFont, monospace;
+        user-select: none;
+      }
+
       .brand-subtitle {
         font-size: 12px;
         color: var(--text-muted);
@@ -182,6 +199,12 @@
         border-color: var(--primary);
         background: transparent;
         box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18);
+      }
+
+      .custom-input-box.drag-over {
+        border-color: var(--primary);
+        background: rgba(0, 122, 255, 0.08);
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
       }
 
       .input-icon {
@@ -811,6 +834,11 @@
       </div>
     </div>
 
+    <!-- Footer Bar -->
+    <div class="footer">
+      <span id="app-version" class="version-text">v1.0.1</span>
+    </div>
+
     <script>
       let isRunning = false;
       let autoPortEnabled = true;
@@ -969,13 +997,102 @@
         }
       });
 
+      // Safe Copy with Fallback
+      function copyTextSafely(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              showToast("已复制访问链接！", "📋");
+            })
+            .catch(() => {
+              fallbackCopy(text);
+            });
+        } else {
+          fallbackCopy(text);
+        }
+      }
+
+      function fallbackCopy(text) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          showToast("已复制访问链接！", "📋");
+        } catch (err) {
+          showToast("复制失败，请手动选择复制", "⚠️");
+        } finally {
+          ta.remove();
+        }
+      }
+
       // Copy Link
       copyBtn.addEventListener("click", () => {
         if (!isRunning) return;
         const url = `http://127.0.0.1:${currentPort}`;
-        navigator.clipboard.writeText(url).then(() => {
-          showToast("已复制访问链接！", "📋");
+        copyTextSafely(url);
+      });
+
+      // Keyboard & Input Enhancements
+      portInput.addEventListener("input", () => {
+        portInput.value = portInput.value.replace(/\D/g, "");
+      });
+
+      dirInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          heroBtn.click();
+        }
+      });
+
+      portInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          heroBtn.click();
+        }
+      });
+
+      // Drag and Drop Folder Support
+      const customInputBox = document.querySelector(".custom-input-box");
+      ["dragenter", "dragover"].forEach((eventName) => {
+        window.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          customInputBox.classList.add("drag-over");
         });
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        window.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          customInputBox.classList.remove("drag-over");
+        });
+      });
+
+      window.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        customInputBox.classList.remove("drag-over");
+        if (
+          e.dataTransfer &&
+          e.dataTransfer.files &&
+          e.dataTransfer.files.length > 0
+        ) {
+          const file = e.dataTransfer.files[0];
+          const folderPath = file.path || file.name;
+          if (folderPath) {
+            dirInput.value = folderPath;
+            showToast("已识别拖入路径", "📁");
+            if (isRunning) {
+              await doStart(true);
+            }
+          }
+        }
       });
 
       // Open in Browser
@@ -1162,6 +1279,10 @@
         if (window.pywebview && window.pywebview.api) {
           const config = await window.pywebview.api.get_config();
           if (config) {
+            if (config.version) {
+              const verEl = document.getElementById("app-version");
+              if (verEl) verEl.innerText = `v${config.version}`;
+            }
             recentDirs = config.recent_dirs || [];
             if (recentDirs.length > 0) {
               dirInput.value = recentDirs[0];

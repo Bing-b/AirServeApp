@@ -13,6 +13,8 @@ import tempfile
 import uuid
 
 # 确定运行时的基础路径
+APP_VERSION = "1.0.1"
+
 if getattr(sys, 'frozen', False):
     BASE_PATH = sys._MEIPASS
 else:
@@ -110,6 +112,7 @@ class Api:
         self.config = load_config()
         recent = [d for d in self.config.get("recent_dirs", []) if os.path.exists(d)]
         return {
+            "version": APP_VERSION,
             "recent_dirs": recent,
             "last_port": self.config.get("last_port", 8080),
             "auto_port": self.config.get("auto_port", True)
@@ -123,7 +126,10 @@ class Api:
         if not initial_dir or not os.path.exists(initial_dir):
             initial_dir = os.getcwd()
         try:
-            dialog_type = getattr(webview.FileDialog, 'FOLDER', webview.FOLDER_DIALOG) if hasattr(webview, 'FileDialog') else webview.FOLDER_DIALOG
+            if hasattr(webview, 'FileDialog'):
+                dialog_type = webview.FileDialog.FOLDER
+            else:
+                dialog_type = getattr(webview, 'FOLDER_DIALOG', 20)
             result = window.create_file_dialog(dialog_type, directory=initial_dir)
             if result and len(result) > 0:
                 return os.path.normpath(result[0])
@@ -137,7 +143,10 @@ class Api:
         if not window:
             return ""
         try:
-            dialog_type = getattr(webview.FileDialog, 'SAVE', webview.SAVE_DIALOG) if hasattr(webview, 'FileDialog') else webview.SAVE_DIALOG
+            if hasattr(webview, 'FileDialog'):
+                dialog_type = webview.FileDialog.SAVE
+            else:
+                dialog_type = getattr(webview, 'SAVE_DIALOG', 30)
             result = window.create_file_dialog(
                 dialog_type,
                 save_filename=default_name,
@@ -232,7 +241,7 @@ namespace AirServeRunner {
     static class Program {
         static int GetAvailablePort(int startingPort) {
             int port = startingPort;
-            while (port < 65535) {
+            while (port <= 65535) {
                 try {
                     using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)) {
                         socket.Bind(new IPEndPoint(IPAddress.Loopback, port));
@@ -248,6 +257,7 @@ namespace AirServeRunner {
         [STAThread]
         static void Main() {
             string tempDir = Path.Combine(Path.GetTempPath(), "airserve_" + Guid.NewGuid().ToString().Substring(0, 8));
+            Process miniserve = null;
             try {
                 int targetPort = GetAvailablePort(PORT_PLACEHOLDER);
                 Directory.CreateDirectory(tempDir);
@@ -258,41 +268,63 @@ namespace AirServeRunner {
                 }
                 
                 ZipFile.ExtractToDirectory(zipPath, tempDir);
+                try { File.Delete(zipPath); } catch {}
                 
                 string miniservePath = Path.Combine(tempDir, "bin", "miniserve-win.exe");
-                Process miniserve = Process.Start(new ProcessStartInfo {
+                miniserve = Process.Start(new ProcessStartInfo {
                     FileName = miniservePath,
-                    Arguments = "--index index.html --spa --port " + targetPort + " site",
+                    Arguments = "--index index.html --spa --port " + targetPort + " --header \\\"Cache-Control: no-cache, no-store, must-revalidate\\\" site",
                     WorkingDirectory = tempDir,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     CreateNoWindow = true
                 });
                 
                 Thread.Sleep(500);
-                Process.Start("http://127.0.0.1:" + targetPort + "/?t=" + DateTimeOffset.Now.ToUnixTimeSeconds());
+                Process.Start(new ProcessStartInfo("http://127.0.0.1:" + targetPort + "/?t=" + DateTimeOffset.Now.ToUnixTimeSeconds()) { UseShellExecute = true });
                 
                 MessageBox.Show("【NAME_PLACEHOLDER】原型演示服务运行中！\\n\\n🌐 访问地址：http://127.0.0.1:" + targetPort + "\\n\\n提示：页面已在默认浏览器中打开。\\n点击【确定】退出并停止本地服务。", "AirServe", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 
-                try { miniserve.Kill(); } catch {}
+                try {
+                    if (miniserve != null && !miniserve.HasExited) {
+                        miniserve.Kill();
+                        miniserve.WaitForExit(3000);
+                    }
+                } catch {}
             } catch (Exception ex) {
                 MessageBox.Show("启动失败: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             } finally {
-                try { Directory.Delete(tempDir, true); } catch {}
+                for (int i = 0; i < 5; i++) {
+                    try {
+                        if (Directory.Exists(tempDir)) {
+                            Directory.Delete(tempDir, true);
+                        }
+                        break;
+                    } catch {
+                        Thread.Sleep(200);
+                    }
+                }
             }
         }
     }
 }
 """
+            clean_name = (
+                project_name.replace('\\', '\\\\')
+                .replace('"', '\\"')
+                .replace('\r', '')
+                .replace('\n', ' ')
+            )
             cs_code = cs_code.replace("PORT_PLACEHOLDER", str(port))
-            cs_code = cs_code.replace("NAME_PLACEHOLDER", project_name.replace('"', '\\"'))
+            cs_code = cs_code.replace("NAME_PLACEHOLDER", clean_name)
             cs_path = os.path.join(build_tmp, "stub.cs")
             with open(cs_path, "w", encoding="utf-8") as f:
                 f.write(cs_code)
                 
             # 6. 调用 Windows 系统自带的 csc.exe 编译为独立 EXE
-            csc_path = r"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+            windir = os.environ.get("SystemRoot", r"C:\Windows")
+            csc_path = os.path.join(windir, r"Microsoft.NET\Framework64\v4.0.30319\csc.exe")
             if not os.path.exists(csc_path):
-                csc_path = r"C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe"
+                csc_path = os.path.join(windir, r"Microsoft.NET\Framework\v4.0.30319\csc.exe")
                 
             if not os.path.exists(csc_path):
                 return {"success": False, "message": "未找到系统的 C# 编译器 (csc.exe)，无法生成原生 EXE。"}
@@ -360,6 +392,11 @@ namespace AirServeRunner {
         """启动静态文件服务"""
         if self.server_process:
             self.stop_server()
+            # 稍作等待以确保操作系统释放 TCP 端口，避免重启时误判定端口占用并自增
+            for _ in range(10):
+                if is_port_available(port):
+                    break
+                time.sleep(0.05)
 
         target_dir = os.path.normpath(target_dir.strip())
         if not os.path.exists(target_dir):
@@ -580,7 +617,7 @@ def ensure_single_instance() -> bool:
             user32 = ctypes.windll.user32
 
             ERROR_ALREADY_EXISTS = 183
-            mutex_name = "Global\\AirServe_SingleInstance_Mutex_Lock"
+            mutex_name = "Local\\AirServe_SingleInstance_Mutex_Lock"
             mutex = kernel32.CreateMutexW(None, False, mutex_name)
             last_error = kernel32.GetLastError()
 
