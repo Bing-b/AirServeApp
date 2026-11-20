@@ -9,7 +9,7 @@
   *免配置即开即用 · 自动避让可用端口 · SPA 路由支持 · 单文件免安装交付*
 
   <p align="center">
-    <a href="https://github.com/Bing-b/AirServerApp/releases"><img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-007AFF?style=flat-square" alt="Platform"></a>
+    <a href="https://github.com/Bing-b/AirServerApp/releases"><img src="https://img.shields.io/badge/Platform-Windows-007AFF?style=flat-square" alt="Platform"></a>
     <a href="https://github.com/svenstaro/miniserve"><img src="https://img.shields.io/badge/Core-Miniserve%20(Rust)-DEA584?style=flat-square&logo=rust" alt="Miniserve"></a>
     <a href="https://pywebview.flowrl.com/"><img src="https://img.shields.io/badge/GUI-PyWebView%205.0-34C759?style=flat-square" alt="GUI"></a>
     <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
@@ -76,7 +76,6 @@
 
 直接前往 [Releases 页面](https://github.com/Bing-b/AirServerApp/releases) 下载最新发行版：
 - **Windows**：下载 `AirServe.exe`，免安装直接运行。
-- <!-- **macOS**：下载 `AirServe.app`（暂未实机测试，待后续开放） -->
 
 ---
 
@@ -104,21 +103,13 @@
 
 ## 本地构建打包
 
-项目内置了针对 Windows 与 macOS 的一键全量打包脚本：
+项目内置了 Windows 一键全量打包脚本：
 
 ### Windows (.exe)
 ```cmd
 build_win.bat
 ```
 构建产物位于 `dist/AirServe.exe`，免安装直接运行。
-
-<!--
-### macOS (.app) [暂无实机测试环境，暂时注释挂起]
-```bash
-chmod +x build_mac.sh && ./build_mac.sh
-```
-构建产物位于 `dist/AirServe.app`。
--->
 
 ---
 
